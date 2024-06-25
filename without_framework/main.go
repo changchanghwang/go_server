@@ -2,30 +2,22 @@ package main
 
 import (
 	"fmt"
-	"io"
-	"net"
+	"log"
 	"net/http"
 
-	"without.framework/router"
+	accountHandler "without.framework/handlers/account"
 )
 
 func main() {
-	fmt.Println("Server listening on port 8080...")
-	router := router.New()
-	router.Get("/hello", func(res http.ResponseWriter, req *http.Request) {
-		fmt.Fprint(res, "Hello, World!")
-	})
-	router.Post("/hello", func(res http.ResponseWriter, req *http.Request) {
-		body, err := io.ReadAll(req.Body)
-		if err != nil {
-			fmt.Printf("error reading body: %s\n", err)
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/account", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "POST" {
+			accountHandler.AddAccount(w, r)
 		}
-		fmt.Fprintf(res, "Hello, %s!", body)
 	})
 
-	l, err := net.Listen("tcp", ":8080")
-	if err != nil {
-		fmt.Printf("error starting server: %s\n", err)
-	}
-	http.Serve(l, router)
+	fmt.Println("Server running on port 4000")
+	err := http.ListenAndServe(":4000", mux)
+	log.Fatal(err)
 }
