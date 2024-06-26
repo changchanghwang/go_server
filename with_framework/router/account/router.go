@@ -9,6 +9,10 @@ type CreateAccountDto struct {
 	UserId string `json:"userId"`
 }
 
+type DepositDto struct {
+	Amount int `json:"amount"`
+}
+
 func Route(r fiber.Router) {
 
 	r.Post("/", func(c *fiber.Ctx) error {
@@ -30,6 +34,16 @@ func Route(r fiber.Router) {
 		userId := c.Params("userId")
 		account := accountService.Retrieve(userId)
 		return c.JSON(account)
+	})
+
+	r.Post("/:userId/deposit", func(c *fiber.Ctx) error {
+		depositDto := DepositDto{}
+		userId := c.Params("userId")
+		if err := c.BodyParser(&depositDto); err != nil {
+			return err
+		}
+		accountService.Deposit(userId, depositDto.Amount)
+		return nil
 	})
 
 }

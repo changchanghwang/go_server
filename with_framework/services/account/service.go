@@ -33,3 +33,23 @@ func Retrieve(userId string) account.Account {
 
 	return account
 }
+
+func Deposit(userId string, amount int) {
+	account, err := accountRepository.FindOneByUserId(userId)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	err = account.Deposit(amount)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	err = accountRepository.Save(account)
+	if err != nil {
+		fmt.Println(err)
+		//TODO: Rollback
+	}
+}

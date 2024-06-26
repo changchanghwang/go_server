@@ -1,7 +1,6 @@
 package database
 
 import (
-	"errors"
 	"sync"
 
 	"with.framework/domain/account"
@@ -19,9 +18,10 @@ var Database = database{
 	accounts: make(map[string]account.Account),
 }
 
-func (db *database) Insert(data account.Account) error {
+func (db *database) Upsert(data account.Account) error {
 	if _, ok := db.accounts[data.Id]; ok {
-		return errors.New("account already exists")
+		db.accounts[data.Id] = data
+		return nil
 	}
 	db.accounts[data.Id] = data
 	return nil

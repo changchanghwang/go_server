@@ -6,7 +6,7 @@ import (
 )
 
 func Save(account account.Account) error {
-	err := database.Database.Insert(account)
+	err := database.Database.Upsert(account)
 	return err
 }
 
