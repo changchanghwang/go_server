@@ -46,4 +46,14 @@ func Route(r fiber.Router) {
 		return nil
 	})
 
+	r.Post("/:userId/withdraw", func(c *fiber.Ctx) error {
+		depositDto := DepositDto{}
+		userId := c.Params("userId")
+		if err := c.BodyParser(&depositDto); err != nil {
+			return err
+		}
+		accountService.Withdraw(userId, depositDto.Amount)
+		return nil
+	})
+
 }
