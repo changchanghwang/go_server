@@ -30,13 +30,17 @@ func Route(r fiber.Router) {
 		return c.JSON(accounts)
 	})
 
-	r.Get("/:userId", func(c *fiber.Ctx) error {
+	/**
+	 * :userId router
+	 */
+	userIdRouter := r.Group("/:userId")
+
+	userIdRouter.Get("/", func(c *fiber.Ctx) error {
 		userId := c.Params("userId")
 		account := accountService.Retrieve(userId)
 		return c.JSON(account)
 	})
-
-	r.Post("/:userId/deposit", func(c *fiber.Ctx) error {
+	userIdRouter.Post("/deposit", func(c *fiber.Ctx) error {
 		depositDto := DepositDto{}
 		userId := c.Params("userId")
 		if err := c.BodyParser(&depositDto); err != nil {
@@ -45,8 +49,7 @@ func Route(r fiber.Router) {
 		accountService.Deposit(userId, depositDto.Amount)
 		return nil
 	})
-
-	r.Post("/:userId/withdraw", func(c *fiber.Ctx) error {
+	userIdRouter.Post("/withdraw", func(c *fiber.Ctx) error {
 		depositDto := DepositDto{}
 		userId := c.Params("userId")
 		if err := c.BodyParser(&depositDto); err != nil {
