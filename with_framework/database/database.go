@@ -1,6 +1,7 @@
 package database
 
 import (
+	"errors"
 	"sync"
 
 	"with.framework/domain/account"
@@ -19,7 +20,10 @@ var Database = database{
 }
 
 func (db *database) Upsert(data account.Account) error {
-	if _, ok := db.accounts[data.Id]; ok {
+	if existAccount, ok := db.accounts[data.Id]; ok {
+		if existAccount.UserId == data.UserId {
+			return errors.New("already exist userId")
+		}
 		db.accounts[data.Id] = data
 		return nil
 	}
