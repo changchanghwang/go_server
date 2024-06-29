@@ -2,44 +2,55 @@ package database
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 
 	"with.framework/domain/account"
 )
 
-type database struct {
-	accounts map[string]account.Account
+type accountEntity struct {
+	Account *account.Account
+	*sync.Mutex
+}
+
+type Database struct {
+	accounts map[string]accountEntity
+}
+
+func New() *Database {
+	return &Database{}
 }
 
 type WhereOption struct {
 	UserId any
 }
 
-var Database = database{
-	accounts: make(map[string]account.Account),
-}
+func (db *Database) Upsert(data *account.Account) error {
+	if db.accounts == nil {
+		db.accounts = make(map[string]accountEntity)
+	}
 
-func (db *database) Upsert(data account.Account) error {
 	if existAccount, ok := db.accounts[data.Id]; ok {
-		if existAccount.UserId == data.UserId {
+		if existAccount.Account.Id != data.Id && existAccount.Account.UserId == data.UserId {
 			return errors.New("already exist userId")
 		}
-		db.accounts[data.Id] = data
-		return nil
 	}
-	db.accounts[data.Id] = data
+	db.accounts[data.Id] = accountEntity{data, new(sync.Mutex)}
+
+	fmt.Println("$$$", db.accounts[data.Id].Account)
+
 	return nil
 }
 
-func (db *database) Select(data account.Account, where any) ([]account.Account, error) {
-	accounts := make([]account.Account, 0)
+func (db *Database) Select(data account.Account, where any) ([]*account.Account, error) {
+	accounts := make([]*account.Account, 0)
 	whereOption, isWhereExist := where.(WhereOption)
 
 	if isWhereExist {
 		for _, account := range db.accounts {
 			userId, isString := whereOption.UserId.(string)
-			if isString && account.UserId == userId {
-				accounts = append(accounts, account)
+			if isString && account.Account.UserId == userId {
+				accounts = append(accounts, account.Account)
 			}
 		}
 		return accounts, nil
@@ -51,10 +62,29 @@ func (db *database) Select(data account.Account, where any) ([]account.Account, 
 		for _, account := range db.accounts {
 			go func() {
 				defer wg.Done()
-				accounts = append(accounts, account)
+				accounts = append(accounts, account.Account)
 			}()
 		}
 		wg.Wait()
 		return accounts, nil
+	}
+}
+
+func (db *Database) Lock(where WhereOption) {
+	for _, account := range db.accounts {
+		if account.Account.UserId == where.UserId {
+			fmt.Println("!!!", &account.Account)
+			fmt.Println("try lock")
+			account.TryLock()
+		}
+	}
+}
+
+func (db *Database) Unlock(where WhereOption) {
+	for _, account := range db.accounts {
+		if account.Account.UserId == where.UserId {
+			fmt.Println("try unlock")
+			account.Unlock()
+		}
 	}
 }

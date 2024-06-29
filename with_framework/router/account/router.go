@@ -2,7 +2,7 @@ package accountRouter
 
 import (
 	"github.com/gofiber/fiber/v2"
-	accountService "with.framework/services/account"
+	application "with.framework/services/account"
 )
 
 type CreateAccountDto struct {
@@ -12,6 +12,8 @@ type CreateAccountDto struct {
 type DepositDto struct {
 	Amount int `json:"amount"`
 }
+
+var accountService = application.AccountService{}
 
 func Route(r fiber.Router) {
 

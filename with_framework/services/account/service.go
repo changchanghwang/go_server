@@ -4,29 +4,17 @@ import (
 	"fmt"
 
 	"with.framework/domain/account"
-	accountRepository "with.framework/infrastructure/account"
+	infrastructure "with.framework/infrastructure/account"
 )
 
-func AddAccount(userId string) {
+type AccountService struct {
+	accountRepository infrastructure.AccountRepository
+}
+
+func (service *AccountService) AddAccount(userId string) *account.Account {
 	account := account.New(userId)
 
-	err := accountRepository.Save(account)
-	if err != nil {
-		fmt.Println(err)
-	}
-}
-
-func List() []account.Account {
-	accounts, err := accountRepository.Find()
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	return accounts
-}
-
-func Retrieve(userId string) account.Account {
-	account, err := accountRepository.FindOneByUserId(userId)
+	err := service.accountRepository.Save(account)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -34,8 +22,29 @@ func Retrieve(userId string) account.Account {
 	return account
 }
 
-func Deposit(userId string, amount int) {
-	account, err := accountRepository.FindOneByUserId(userId)
+func (service *AccountService) List() []*account.Account {
+	accounts, err := service.accountRepository.Find()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return accounts
+}
+
+func (service *AccountService) Retrieve(userId string) *account.Account {
+	account, err := service.accountRepository.FindOneByUserId(userId)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return account
+}
+
+func (service *AccountService) Deposit(userId string, amount int) {
+	service.accountRepository.Lock(userId)
+	defer service.accountRepository.Unlock(userId)
+	account, err := service.accountRepository.FindOneByUserId(userId)
+	fmt.Println("@@@@", &account)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -47,15 +56,17 @@ func Deposit(userId string, amount int) {
 		return
 	}
 
-	err = accountRepository.Save(account)
+	err = service.accountRepository.Save(account)
 	if err != nil {
 		fmt.Println(err)
 		//TODO: Rollback
 	}
 }
 
-func Withdraw(userId string, amount int) {
-	account, err := accountRepository.FindOneByUserId(userId)
+func (service *AccountService) Withdraw(userId string, amount int) {
+	service.accountRepository.Lock(userId)
+	defer service.accountRepository.Unlock(userId)
+	account, err := service.accountRepository.FindOneByUserId(userId)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -67,7 +78,7 @@ func Withdraw(userId string, amount int) {
 		return
 	}
 
-	err = accountRepository.Save(account)
+	err = service.accountRepository.Save(account)
 	if err != nil {
 		fmt.Println(err)
 		// TODO: Rollback

@@ -5,18 +5,42 @@ import (
 	"with.framework/domain/account"
 )
 
-func Save(account account.Account) error {
-	err := database.Database.Upsert(account)
+type AccountRepository interface {
+	Save(account *account.Account) error
+	Find() ([]*account.Account, error)
+	FindOneByUserId(userId string) (*account.Account, error)
+	Lock(userId string)
+	Unlock(userId string)
+}
+
+type repository struct {
+	database *database.Database
+}
+
+func NewAccountRepository() AccountRepository {
+	return &repository{database: database.New()}
+}
+
+func (repository *repository) Save(account *account.Account) error {
+	err := repository.database.Upsert(account)
 	return err
 }
 
-func Find() ([]account.Account, error) {
-	accounts, err := database.Database.Select(account.Account{}, nil)
+func (repository *repository) Find() ([]*account.Account, error) {
+	accounts, err := repository.database.Select(account.Account{}, nil)
 
 	return accounts, err
 }
 
-func FindOneByUserId(userId string) (account.Account, error) {
-	accounts, err := database.Database.Select(account.Account{}, database.WhereOption{UserId: userId})
+func (repository *repository) FindOneByUserId(userId string) (*account.Account, error) {
+	accounts, err := repository.database.Select(account.Account{}, database.WhereOption{UserId: userId})
 	return accounts[0], err
+}
+
+func (repository *repository) Lock(userId string) {
+	repository.database.Lock(database.WhereOption{UserId: userId})
+}
+
+func (repository *repository) Unlock(userId string) {
+	repository.database.Unlock(database.WhereOption{UserId: userId})
 }

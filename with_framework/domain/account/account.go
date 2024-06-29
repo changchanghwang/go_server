@@ -12,8 +12,8 @@ type Account struct {
 	Balance int
 }
 
-func New(userId string) Account {
-	return Account{Id: uuid.New().String(), UserId: userId, Balance: 0}
+func New(userId string) *Account {
+	return &Account{Id: uuid.New().String(), UserId: userId, Balance: 0}
 }
 
 func (a *Account) Deposit(amount int) error {
