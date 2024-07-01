@@ -17,8 +17,8 @@ type repository struct {
 	database *database.Database
 }
 
-func NewAccountRepository() AccountRepository {
-	return &repository{database: database.New()}
+func NewAccountRepository(database *database.Database) AccountRepository {
+	return &repository{database}
 }
 
 func (repository *repository) Save(account *account.Account) error {
@@ -34,6 +34,9 @@ func (repository *repository) Find() ([]*account.Account, error) {
 
 func (repository *repository) FindOneByUserId(userId string) (*account.Account, error) {
 	accounts, err := repository.database.Select(account.Account{}, database.WhereOption{UserId: userId})
+	if len(accounts) == 0 {
+		return nil, err
+	}
 	return accounts[0], err
 }
 

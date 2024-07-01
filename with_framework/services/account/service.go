@@ -11,9 +11,12 @@ type AccountService struct {
 	accountRepository infrastructure.AccountRepository
 }
 
+func New(accountRepository infrastructure.AccountRepository) *AccountService {
+	return &AccountService{accountRepository}
+}
+
 func (service *AccountService) AddAccount(userId string) *account.Account {
 	account := account.New(userId)
-
 	err := service.accountRepository.Save(account)
 	if err != nil {
 		fmt.Println(err)
@@ -44,7 +47,6 @@ func (service *AccountService) Deposit(userId string, amount int) {
 	service.accountRepository.Lock(userId)
 	defer service.accountRepository.Unlock(userId)
 	account, err := service.accountRepository.FindOneByUserId(userId)
-	fmt.Println("@@@@", &account)
 	if err != nil {
 		fmt.Println(err)
 		return

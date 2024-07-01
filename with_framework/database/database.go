@@ -2,7 +2,6 @@ package database
 
 import (
 	"errors"
-	"fmt"
 	"sync"
 
 	"with.framework/domain/account"
@@ -30,14 +29,14 @@ func (db *Database) Upsert(data *account.Account) error {
 		db.accounts = make(map[string]accountEntity)
 	}
 
+	mutex := &sync.Mutex{}
 	if existAccount, ok := db.accounts[data.Id]; ok {
 		if existAccount.Account.Id != data.Id && existAccount.Account.UserId == data.UserId {
 			return errors.New("already exist userId")
 		}
+		mutex = existAccount.Mutex
 	}
-	db.accounts[data.Id] = accountEntity{data, new(sync.Mutex)}
-
-	fmt.Println("$$$", db.accounts[data.Id].Account)
+	db.accounts[data.Id] = accountEntity{data, mutex}
 
 	return nil
 }
@@ -73,9 +72,7 @@ func (db *Database) Select(data account.Account, where any) ([]*account.Account,
 func (db *Database) Lock(where WhereOption) {
 	for _, account := range db.accounts {
 		if account.Account.UserId == where.UserId {
-			fmt.Println("!!!", &account.Account)
-			fmt.Println("try lock")
-			account.TryLock()
+			account.Lock()
 		}
 	}
 }
@@ -83,7 +80,6 @@ func (db *Database) Lock(where WhereOption) {
 func (db *Database) Unlock(where WhereOption) {
 	for _, account := range db.accounts {
 		if account.Account.UserId == where.UserId {
-			fmt.Println("try unlock")
 			account.Unlock()
 		}
 	}
