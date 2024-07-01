@@ -30,23 +30,23 @@ func (db *Database) Upsert(data *account.Account) error {
 	if existAccount, isExist := db.accounts.Load(data.Id); isExist {
 		account := existAccount.(accountEntity)
 		mutex = account.Mutex
-	}
+	} else {
+		isUniqueExist := false
 
-	isUniqueExist := false
+		db.accounts.Range(func(key, value interface{}) bool {
+			account := value.(accountEntity)
 
-	db.accounts.Range(func(key, value interface{}) bool {
-		account := value.(accountEntity)
+			if account.Account.UserId == data.UserId {
+				isUniqueExist = true
+				return false
+			}
 
-		if account.Account.UserId == data.UserId {
-			isUniqueExist = true
-			return false
+			return true
+		})
+
+		if isUniqueExist {
+			return errors.New("already exist userId")
 		}
-
-		return true
-	})
-
-	if isUniqueExist {
-		return errors.New("already exist userId")
 	}
 
 	db.accounts.Store(data.Id, accountEntity{Account: data, Mutex: mutex})
