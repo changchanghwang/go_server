@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
+	errorUtils "with.framework/libs/error-utils"
 )
 
 type Account struct {
@@ -18,7 +19,7 @@ func New(userId string) *Account {
 
 func (a *Account) Deposit(amount int) error {
 	if amount < 0 {
-		return errors.New(("amount must be positive"))
+		return errorUtils.Wrap(errors.New(("amount must be positive")))
 	}
 	a.Balance += amount
 	return nil
@@ -26,10 +27,10 @@ func (a *Account) Deposit(amount int) error {
 
 func (a *Account) Withdraw(amount int) error {
 	if amount < 0 {
-		return errors.New("amount must be positive")
+		return errorUtils.Wrap(errors.New("amount must be positive"))
 	}
 	if a.Balance < amount {
-		return errors.New("insufficient balance")
+		return errorUtils.Wrap(errors.New("insufficient balance"))
 	}
 	a.Balance -= amount
 	return nil

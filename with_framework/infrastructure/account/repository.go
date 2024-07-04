@@ -3,6 +3,7 @@ package accountRepository
 import (
 	"with.framework/database"
 	"with.framework/domain/account"
+	errorUtils "with.framework/libs/error-utils"
 )
 
 type AccountRepository interface {
@@ -23,21 +24,30 @@ func NewAccountRepository(database *database.Database) AccountRepository {
 
 func (repository *repository) Save(account *account.Account) error {
 	err := repository.database.Upsert(account)
-	return err
+	if err != nil {
+		return errorUtils.Wrap(err)
+	}
+	return nil
 }
 
 func (repository *repository) Find() ([]*account.Account, error) {
 	accounts, err := repository.database.Select(account.Account{}, nil)
+	if err != nil {
+		return nil, errorUtils.Wrap(err)
+	}
 
-	return accounts, err
+	return accounts, nil
 }
 
 func (repository *repository) FindOneByUserId(userId string) (*account.Account, error) {
 	accounts, err := repository.database.Select(account.Account{}, database.WhereOption{UserId: userId})
 	if len(accounts) == 0 {
-		return nil, err
+		return nil, errorUtils.Wrap(err)
 	}
-	return accounts[0], err
+	if err != nil {
+		return nil, errorUtils.Wrap(err)
+	}
+	return accounts[0], nil
 }
 
 func (repository *repository) Lock(userId string) {

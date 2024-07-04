@@ -42,7 +42,7 @@ func (suite *ServiceTestSuite) TestDeposit() {
 	}
 	wg.Wait()
 
-	account := suite.accountService.Retrieve("deposit")
+	account, _ := suite.accountService.Retrieve("deposit")
 
 	assert.Equal(suite.T(), 10000, account.Balance)
 }

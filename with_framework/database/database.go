@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"with.framework/domain/account"
+	errorUtils "with.framework/libs/error-utils"
 )
 
 type accountEntity struct {
@@ -45,7 +46,7 @@ func (db *Database) Upsert(data *account.Account) error {
 		})
 
 		if isUniqueExist {
-			return errors.New("already exist userId")
+			return errorUtils.Wrap(errors.New("already exist userId"))
 		}
 	}
 

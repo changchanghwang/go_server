@@ -2,6 +2,7 @@ package accountRouter
 
 import (
 	"github.com/gofiber/fiber/v2"
+	errorUtils "with.framework/libs/error-utils"
 	application "with.framework/services/account"
 )
 
@@ -33,7 +34,12 @@ func (controller *AccountController) Route(r fiber.Router) {
 	})
 
 	r.Get("/", func(c *fiber.Ctx) error {
-		accounts := controller.accountService.List()
+		accounts, err := controller.accountService.List()
+		if err != nil {
+			if appError, ok := errorUtils.UnWrapWithCode(err); ok {
+				return c.Status(appError.Code).JSON(err)
+			}
+		}
 		return c.JSON(accounts)
 	})
 
@@ -44,7 +50,14 @@ func (controller *AccountController) Route(r fiber.Router) {
 
 	userIdRouter.Get("/", func(c *fiber.Ctx) error {
 		userId := c.Params("userId")
-		account := controller.accountService.Retrieve(userId)
+		account, err := controller.accountService.Retrieve(userId)
+
+		if err != nil {
+			if appError, ok := errorUtils.UnWrapWithCode(err); ok {
+				return c.Status(appError.Code).JSON(err)
+			}
+		}
+
 		return c.JSON(account)
 	})
 	userIdRouter.Post("/deposit", func(c *fiber.Ctx) error {
@@ -53,7 +66,13 @@ func (controller *AccountController) Route(r fiber.Router) {
 		if err := c.BodyParser(&depositDto); err != nil {
 			return err
 		}
-		controller.accountService.Deposit(userId, depositDto.Amount)
+		err := controller.accountService.Deposit(userId, depositDto.Amount)
+
+		if err != nil {
+			if appError, ok := errorUtils.UnWrapWithCode(err); ok {
+				return c.Status(appError.Code).JSON(appError.Error())
+			}
+		}
 		return nil
 	})
 	userIdRouter.Post("/withdraw", func(c *fiber.Ctx) error {
@@ -62,7 +81,14 @@ func (controller *AccountController) Route(r fiber.Router) {
 		if err := c.BodyParser(&depositDto); err != nil {
 			return err
 		}
-		controller.accountService.Withdraw(userId, depositDto.Amount)
+		err := controller.accountService.Withdraw(userId, depositDto.Amount)
+
+		if err != nil {
+			if appError, ok := errorUtils.UnWrapWithCode(err); ok {
+				return c.Status(appError.Code).JSON(appError.Error())
+			}
+		}
+
 		return nil
 	})
 
