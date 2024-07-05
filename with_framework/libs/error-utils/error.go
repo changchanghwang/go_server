@@ -12,12 +12,12 @@ func WrapWithCode(err error, code int) error {
 }
 
 func UnWrapWithCode(err error) (*applicationError, bool) {
+	fmt.Println(err)
 	for err != nil {
 		switch err.(type) {
 		case *applicationError:
 			return err.(*applicationError), true
 		}
-		fmt.Println(err)
 	}
 	return nil, false
 }
