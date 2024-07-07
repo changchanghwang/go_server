@@ -4,10 +4,11 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"with.orm/libs/health"
 )
 
 type app struct {
-	*gin.Engine
+	router *gin.Engine
 }
 
 func New() *app {
@@ -15,11 +16,7 @@ func New() *app {
 }
 
 func (a *app) Listen(port int) {
-	a.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
+	health.Check(a.router)
 
-	a.Run(":" + strconv.Itoa(port))
+	a.router.Run(":" + strconv.Itoa(port))
 }
