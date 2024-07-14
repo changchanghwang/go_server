@@ -6,7 +6,7 @@ import (
 )
 
 type Product struct {
-	entity.BaseModel `gorm:"embedded"`
+	entity.SoftDeletableModel
 
 	Id   string `gorm: "primaryKey"`
 	Name string
