@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 
+	inventory "with.orm/services/inventories/domain"
 	product "with.orm/services/products/domain"
 )
 
@@ -28,7 +29,7 @@ func Init() *gorm.DB {
 	if err != nil {
 		log.Fatal(err)
 	}
-	db.AutoMigrate(&product.Product{})
+	db.AutoMigrate(&product.Product{}, &inventory.Inventory{})
 
 	return db
 }

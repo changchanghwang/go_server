@@ -5,9 +5,9 @@ import "with.orm/libs/entity"
 type Inventory struct {
 	entity.BaseModel
 
-	Id        int    `gorm: "primaryKey"`
-	productId string `gorm: "unique"`
-	stock     int
+	Id        int    `gorm:"primaryKey"`
+	ProductId string `gorm:"column:productId;unique"`
+	Stock     int
 }
 
 func (Inventory) TableName() string {
@@ -16,7 +16,7 @@ func (Inventory) TableName() string {
 
 func New(productId string, stock int) *Inventory {
 	return &Inventory{
-		productId: productId,
-		stock:     stock,
+		ProductId: productId,
+		Stock:     stock,
 	}
 }

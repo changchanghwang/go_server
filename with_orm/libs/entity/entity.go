@@ -13,5 +13,5 @@ type BaseModel struct {
 
 type SoftDeletableModel struct {
 	BaseModel
-	DeletedAt gorm.DeletedAt `json:"_", gorm:"index;Column:deletedAt"`
+	DeletedAt gorm.DeletedAt `json:"_", gorm:"index;"`
 }

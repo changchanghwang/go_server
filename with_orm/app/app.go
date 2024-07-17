@@ -11,6 +11,7 @@ import (
 	"go.uber.org/fx"
 	"with.orm/libs/db"
 	"with.orm/router"
+	inventoryPresentation "with.orm/services/inventories/presentation"
 	productPresentation "with.orm/services/products/presentation"
 )
 
@@ -33,12 +34,12 @@ func (a *App) Stop(ctx context.Context) error {
 	return a.server.Shutdown(ctx)
 }
 
-func ServerRun(lc fx.Lifecycle, productController *productPresentation.ProductController) *App {
+func ServerRun(lc fx.Lifecycle, productController *productPresentation.ProductController, inventoryController *inventoryPresentation.InventoryController) *App {
 	server := new()
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			db.Init()
-			router.Route(server.router, productController)
+			router.Route(server.router, productController, inventoryController)
 			go func() {
 				// service connections
 				fmt.Println("Server running on 3000")
