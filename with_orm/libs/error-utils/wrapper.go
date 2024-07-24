@@ -5,7 +5,7 @@ import (
 	"runtime"
 )
 
-var funcInfoFormat = "{%s:%d} [%s]"
+var funcInfoFormat = "Stack Trace: {%s:%d} [%s]"
 
 func getFuncInfo(pc uintptr, file string, line int) string {
 	f := runtime.FuncForPC(pc)
