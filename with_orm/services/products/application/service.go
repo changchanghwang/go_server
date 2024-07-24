@@ -1,6 +1,7 @@
 package application
 
 import (
+	errorUtils "with.orm/libs/error-utils"
 	product "with.orm/services/products/domain"
 	"with.orm/services/products/infrastructure"
 )
@@ -15,8 +16,10 @@ func NewProductService(productRepository infrastructure.ProductRepository) *Prod
 
 func (service *ProductService) Create(name string) error {
 	product := product.New(name)
-	return service.productRepository.Save(product)
+	err := service.productRepository.Save(product)
+	return errorUtils.WrapWithCode(err, 500)
 }
 func (service *ProductService) List() ([]*product.Product, error) {
-	return service.productRepository.Find()
+	products, err := service.productRepository.Find()
+	return products, errorUtils.WrapWithCode(err, 500)
 }

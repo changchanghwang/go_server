@@ -2,6 +2,7 @@ package infrastructure
 
 import (
 	"gorm.io/gorm"
+	errorUtils "with.orm/libs/error-utils"
 	"with.orm/services/products/domain"
 )
 
@@ -20,17 +21,18 @@ func NewProductRepository(db *gorm.DB) ProductRepository {
 }
 
 func (repository *productRepositoryImpl) Save(product *domain.Product) error {
-	return repository.db.Save(product).Error
+	err := repository.db.Save(product).Error
+	return errorUtils.Wrap(err)
 }
 
 func (repository *productRepositoryImpl) FindOne(id string) (*domain.Product, error) {
 	product := &domain.Product{}
 	err := repository.db.Where("id = ?", id).First(product).Error
-	return product, err
+	return product, errorUtils.Wrap(err)
 }
 
 func (repository *productRepositoryImpl) Find() ([]*domain.Product, error) {
 	products := []*domain.Product{}
 	err := repository.db.Find(&products).Error
-	return products, err
+	return products, errorUtils.Wrap(err)
 }

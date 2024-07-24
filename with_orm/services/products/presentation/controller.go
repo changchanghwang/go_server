@@ -2,6 +2,7 @@ package presentation
 
 import (
 	"github.com/gin-gonic/gin"
+	errorUtils "with.orm/libs/error-utils"
 	"with.orm/services/products/application"
 )
 
@@ -26,8 +27,10 @@ func (controller *ProductController) create(c *gin.Context) {
 
 	err := controller.productService.Create(dto.Name)
 	if err != nil {
-		c.JSON(500, "error")
-		return
+		if appError, ok := errorUtils.UnWrapWithCode(err); ok {
+			c.JSON(appError.Code, appError.GetMessage())
+			return
+		}
 	}
 	c.JSON(200, "success")
 }
@@ -35,8 +38,10 @@ func (controller *ProductController) create(c *gin.Context) {
 func (controller *ProductController) list(c *gin.Context) {
 	products, err := controller.productService.List()
 	if err != nil {
-		c.JSON(500, "error")
-		return
+		if appError, ok := errorUtils.UnWrapWithCode(err); ok {
+			c.JSON(appError.Code, appError.GetMessage())
+			return
+		}
 	}
 	c.JSON(200, products)
 }
